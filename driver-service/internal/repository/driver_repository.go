@@ -28,8 +28,17 @@ func (r *DriverRepository) Create(driver *model.Driver) error {
 	driver.CreatedAt = time.Now()
 	driver.UpdatedAt = time.Now()
 
-	_, err := r.collection.InsertOne(context.Background(), driver)
-	return err
+	result, err := r.collection.InsertOne(context.Background(), driver)
+	if err != nil {
+		return err
+	}
+
+	// Set the generated ID
+	if oid, ok := result.InsertedID.(primitive.ObjectID); ok {
+		driver.ID = oid.Hex()
+	}
+
+	return nil
 }
 
 func (r *DriverRepository) Update(id string, driver *model.Driver) error {
