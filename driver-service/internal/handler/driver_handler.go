@@ -19,6 +19,16 @@ func NewDriverHandler(service *service.DriverService) *DriverHandler {
 	}
 }
 
+// CreateDriver godoc
+// @Summary      Create a new driver
+// @Description  Register a new driver in the system
+// @Tags         drivers
+// @Accept       json
+// @Produce      json
+// @Param        driver  body      model.Driver  true  "Driver data"
+// @Success      201     {object}  model.Driver
+// @Failure      400     {object}  map[string]string
+// @Router       /drivers [post]
 func (h *DriverHandler) CreateDriver(c *gin.Context) {
 	var driver model.Driver
 
@@ -35,6 +45,17 @@ func (h *DriverHandler) CreateDriver(c *gin.Context) {
 	c.JSON(http.StatusCreated, driver)
 }
 
+// UpdateDriver godoc
+// @Summary      Update a driver
+// @Description  Update driver information by ID
+// @Tags         drivers
+// @Accept       json
+// @Produce      json
+// @Param        id      path      string        true  "Driver ID"
+// @Param        driver  body      model.Driver  true  "Driver data"
+// @Success      200     {object}  model.Driver
+// @Failure      400     {object}  map[string]string
+// @Router       /drivers/{id} [put]
 func (h *DriverHandler) UpdateDriver(c *gin.Context) {
 	id := c.Param("id")
 
@@ -52,6 +73,17 @@ func (h *DriverHandler) UpdateDriver(c *gin.Context) {
 	c.JSON(http.StatusOK, driver)
 }
 
+// GetAllDrivers godoc
+// @Summary      List all drivers
+// @Description  Get a paginated list of all drivers
+// @Tags         drivers
+// @Accept       json
+// @Produce      json
+// @Param        page      query     int  false  "Page number"  default(1)
+// @Param        pageSize  query     int  false  "Page size"    default(20)
+// @Success      200       {array}   model.Driver
+// @Failure      500       {object}  map[string]string
+// @Router       /drivers [get]
 func (h *DriverHandler) GetAllDrivers(c *gin.Context) {
 	page := 1
 	pageSize := 20
@@ -77,6 +109,18 @@ func (h *DriverHandler) GetAllDrivers(c *gin.Context) {
 	c.JSON(http.StatusOK, drivers)
 }
 
+// GetNearbyDrivers godoc
+// @Summary      Find nearby drivers
+// @Description  Find drivers within 6km radius of given coordinates
+// @Tags         drivers
+// @Accept       json
+// @Produce      json
+// @Param        lat       query     number  true   "Latitude"
+// @Param        lon       query     number  true   "Longitude"
+// @Param        taxiType  query     string  false  "Taxi type filter"
+// @Success      200       {array}   model.Driver
+// @Failure      400       {object}  map[string]string
+// @Router       /drivers/nearby [get]
 func (h *DriverHandler) GetNearbyDrivers(c *gin.Context) {
 	lat, err := strconv.ParseFloat(c.Query("lat"), 64)
 	if err != nil {
