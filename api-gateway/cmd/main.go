@@ -3,11 +3,19 @@ package main
 import (
 	"io"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
-const driverServiceURL = "http://localhost:8081"
+var driverServiceURL = getEnv("DRIVER_SERVICE_URL", "http://localhost:8081")
+
+func getEnv(key, fallback string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return fallback
+}
 
 func main() {
 	router := gin.Default()

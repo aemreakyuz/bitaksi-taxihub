@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: taxihub-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - taxihub-network
+
+  driver-service:
+    build:
+      context: ./driver-service
+      dockerfile: Dockerfile
+    container_name: taxihub-driver-service
+    ports:
+      - "8081:8081"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017
+    depends_on:
+      - mongodb
+    networks:
+      - taxihub-network
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: taxihub-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - DRIVER_SERVICE_URL=http://driver-service:8081
+    depends_on:
+      - driver-service
+    networks:
+      - taxihub-network
+
+networks:
+  taxihub-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
