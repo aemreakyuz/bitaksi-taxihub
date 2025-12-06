@@ -4,21 +4,21 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/aemreakyuz/bitaksi-taxihub/api-gateway/internal/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 var driverServiceURL = getEnv("DRIVER_SERVICE_URL", "http://localhost:8081")
 
-func getEnv(key, fallback string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return fallback
-}
-
 func main() {
 	router := gin.Default()
+
+	router.Use(middleware.RequestLogger())
+
+	rateLimiter := middleware.NewRateLimiter(100, time.Minute)
+	router.Use(rateLimiter.Middleware())
 
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -36,6 +36,7 @@ func main() {
 }
 
 func proxyToDriverService(c *gin.Context) {
+
 	targetURL := driverServiceURL + c.Request.URL.Path
 	if c.Request.URL.RawQuery != "" {
 		targetURL += "?" + c.Request.URL.RawQuery
@@ -64,4 +65,11 @@ func proxyToDriverService(c *gin.Context) {
 	}
 
 	c.Data(resp.StatusCode, resp.Header.Get("Content-Type"), body)
+}
+
+func getEnv(key, fallback string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return fallback
 }
